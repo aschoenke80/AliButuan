@@ -20,7 +20,6 @@
                     <img src="/images/logo.png" alt="AliButuan" class="h-10 w-10 object-contain drop-shadow-sm" />
                     <div class="flex flex-col leading-tight">
                         <span class="font-extrabold text-lg text-blue-700 tracking-tight group-hover:text-blue-800 transition-colors">AliButuan</span>
-                        <span class="text-[10px] text-gray-400 font-medium tracking-wide uppercase hidden sm:block">Butuan City Events</span>
                     </div>
                 </a>
 
