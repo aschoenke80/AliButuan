@@ -144,8 +144,8 @@
         maxBoundsViscosity: 1.0,
         minZoom: 12,
     }).setView([initLat, initLng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors © <a href="https://carto.com">CARTO</a>'
     }).addTo(pickerMap);
 
     let pin = L.marker([initLat, initLng], { draggable: true }).addTo(pickerMap);
