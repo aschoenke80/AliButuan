@@ -16,9 +16,12 @@
             <div class="flex items-center justify-between h-16">
 
                 {{-- Logo --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
-                    <img src="/images/logo.png" alt="AliButuan" class="h-9 w-9 rounded-xl object-cover" />
-                    <span class="font-bold text-xl text-blue-600">AliButuan</span>
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 shrink-0 group">
+                    <img src="/images/logo.png" alt="AliButuan" class="h-10 w-10 object-contain drop-shadow-sm" />
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-extrabold text-lg text-blue-700 tracking-tight group-hover:text-blue-800 transition-colors">AliButuan</span>
+                        <span class="text-[10px] text-gray-400 font-medium tracking-wide uppercase hidden sm:block">Butuan City Events</span>
+                    </div>
                 </a>
 
                 {{-- Center Nav (hidden on mobile) --}}
@@ -223,10 +226,12 @@
     <footer class="bg-white border-t border-gray-100 mt-auto hidden md:block">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <img src="/images/logo.png" alt="AliButuan" class="h-8 w-8 rounded-xl object-cover" />
-                    <span class="font-bold text-blue-600">AliButuan</span>
-                    <span class="text-gray-400 text-sm">— Butuan City Event Discovery</span>
+                <div class="flex items-center gap-2.5">
+                    <img src="/images/logo.png" alt="AliButuan" class="h-9 w-9 object-contain" />
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-extrabold text-blue-700 tracking-tight">AliButuan</span>
+                        <span class="text-[10px] text-gray-400 font-medium tracking-wide uppercase">Butuan City Event Discovery</span>
+                    </div>
                 </div>
                 <div class="flex items-center gap-6 text-sm text-gray-500">
                     <a href="{{ route('home') }}" class="hover:text-blue-600">Home</a>
