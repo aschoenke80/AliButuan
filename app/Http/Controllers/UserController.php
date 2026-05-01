@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Event;
 
 class UserController extends Controller
 {
@@ -13,31 +11,7 @@ class UserController extends Controller
     public function edit()
     {
         $user = auth()->user();
-
-        $stats = [];
-
-        if ($user->role === 'admin') {
-            $stats = [
-                'total_users'    => User::count(),
-                'total_events'   => Event::count(),
-                'pending_events' => Event::where('status', 'pending')->count(),
-                'approved_events'=> Event::where('status', 'approved')->count(),
-            ];
-        } elseif ($user->role === 'organizer') {
-            $stats = [
-                'my_events'   => $user->events()->count(),
-                'approved'    => $user->events()->where('status', 'approved')->count(),
-                'pending'     => $user->events()->where('status', 'pending')->count(),
-                'rejected'    => $user->events()->where('status', 'rejected')->count(),
-            ];
-        } else {
-            $stats = [
-                'favorites'     => $user->favorites()->count(),
-                'notifications' => $user->notifications()->where('is_read', false)->count(),
-            ];
-        }
-
-        return view('user.profile', compact('user', 'stats'));
+        return view('user.profile', compact('user'));
     }
 
     // Update profile info (name, email, phone)
