@@ -17,7 +17,7 @@
 
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
-                    <span class="text-2xl">🗺️</span>
+                    <img src="/images/logo.png" alt="AliButuan" class="h-9 w-9 rounded-xl object-cover" />
                     <span class="font-bold text-xl text-blue-600">AliButuan</span>
                 </a>
 
@@ -224,7 +224,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-2">
-                    <span class="text-xl">🗺️</span>
+                    <img src="/images/logo.png" alt="AliButuan" class="h-8 w-8 rounded-xl object-cover" />
                     <span class="font-bold text-blue-600">AliButuan</span>
                     <span class="text-gray-400 text-sm">— Butuan City Event Discovery</span>
                 </div>
