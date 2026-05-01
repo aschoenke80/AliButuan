@@ -1,7 +1,7 @@
 {
     "version": 2,
     "framework": null,
-    "buildCommand": "npm run build",
+    "buildCommand": "composer install --no-dev --optimize-autoloader && npm run build",
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
@@ -23,6 +23,8 @@
         "APP_DEBUG": "false",
         "LOG_CHANNEL": "stderr",
         "DB_CONNECTION": "sqlite",
-        "DB_DATABASE": "/tmp/database.sqlite"
+        "DB_DATABASE": "/tmp/database.sqlite",
+        "CACHE_DRIVER": "array",
+        "SESSION_DRIVER": "cookie"
     }
 }
