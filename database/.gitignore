@@ -1,1 +1,1 @@
-*.sqlite*
+# *.sqlite* — commented out so the seeded database is committed for Vercel deployment
