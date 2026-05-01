@@ -9,7 +9,7 @@
     },
     "routes": [
         {
-            "src": "/(.*\\.(css|js|ico|txt|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot))",
+            "src": "/(.*\\.(css|js|json|ico|txt|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot))",
             "dest": "/$1"
         },
         {
