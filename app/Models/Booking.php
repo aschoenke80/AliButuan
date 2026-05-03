@@ -10,6 +10,7 @@ class Booking extends Model
         'user_id',
         'event_name',
         'location',
+        'advertise_start',
         'hours',
         'days',
         'total_hours',
@@ -19,6 +20,10 @@ class Booking extends Model
         'contact_phone',
         'notes',
         'status',
+    ];
+
+    protected $casts = [
+        'advertise_start' => 'date',
     ];
 
     const RATE_PER_HOUR = 100; // Philippine Peso

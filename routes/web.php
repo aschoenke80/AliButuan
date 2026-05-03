@@ -21,6 +21,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Booking (public — login required to submit)
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('auth');
+Route::get('/admin/bookings', [BookingController::class, 'index'])->name('admin.bookings.index')->middleware(['auth', 'admin']);
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');

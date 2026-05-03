@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\AppNotification;
+use App\Models\Booking;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,15 +13,20 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Inject unread notification count into every view
+        // Inject unread notification count and pending bookings count into every view
         View::composer('*', function ($view) {
-            $count = 0;
+            $unread          = 0;
+            $pendingBookings = 0;
             if (auth()->check()) {
-                $count = AppNotification::where('user_id', auth()->id())
+                $unread = AppNotification::where('user_id', auth()->id())
                     ->where('is_read', false)
                     ->count();
+                if (auth()->user()->isAdmin()) {
+                    $pendingBookings = Booking::where('status', 'pending')->count();
+                }
             }
-            $view->with('unreadNotifications', $count);
+            $view->with('unreadNotifications', $unread);
+            $view->with('pendingBookingsCount', $pendingBookings);
         });
     }
 }
