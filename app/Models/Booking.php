@@ -12,6 +12,8 @@ class Booking extends Model
         'location',
         'advertise_start',
         'advertise_end',
+        'time_start',
+        'time_end',
         'hours',
         'days',
         'total_hours',

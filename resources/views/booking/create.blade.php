@@ -110,23 +110,44 @@
             {{-- Hidden days field (computed by JS, verified server-side) --}}
             <input type="hidden" name="days" id="input-days" value="{{ old('days', 0) }}" />
 
-            {{-- Additional hours --}}
+            {{-- Daily Hour Range --}}
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                    Additional Hours
-                    <span class="text-gray-400 text-xs font-normal">(extra hours on top of the selected days)</span>
-                </label>
-                <div class="relative w-48">
-                    <input type="number" name="hours" id="input-hours" value="{{ old('hours', 0) }}"
-                           min="0" max="23" placeholder="0"
-                           oninput="recalculate()"
-                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('hours') border-red-400 @enderror" />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">hr(s)</span>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Daily Hour Range <span class="text-red-500">*</span></label>
+                <div class="flex items-end gap-3">
+                    <div class="flex-1">
+                        <p class="text-xs font-medium text-gray-500 mb-1.5">From</p>
+                        <input type="time" name="time_start" id="input-time-start"
+                               value="{{ old('time_start', '08:00') }}"
+                               onchange="onTimesChange()"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('time_start') border-red-400 @enderror" />
+                        @error('time_start')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="pb-2.5 text-gray-400 font-bold text-lg select-none">→</div>
+
+                    <div class="flex-1">
+                        <p class="text-xs font-medium text-gray-500 mb-1.5">To</p>
+                        <input type="time" name="time_end" id="input-time-end"
+                               value="{{ old('time_end', '17:00') }}"
+                               onchange="onTimesChange()"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('time_end') border-red-400 @enderror" />
+                        @error('time_end')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-                @error('hours')
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                @enderror
+
+                {{-- Hours-per-day badge --}}
+                <div id="hours-per-day-display" class="mt-3 hidden bg-purple-50 border border-purple-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+                    <span class="text-lg">🕐</span>
+                    <p id="hours-per-day-text" class="text-sm font-semibold text-purple-800"></p>
+                </div>
             </div>
+
+            {{-- Hidden hours-per-day field (computed by JS) --}}
+            <input type="hidden" name="hours" id="input-hours" value="{{ old('hours', 9) }}" />
 
             {{-- Cost Summary --}}
             <div id="cost-summary" class="bg-gray-50 rounded-xl p-4 border border-gray-200">
@@ -199,20 +220,19 @@
 
 @push('scripts')
 <script>
-    const RATE = 100; // pesos per hour
+    const RATE = 100; // ₱ per hour
 
+    // ── Date range changed ────────────────────────────────────────────────────
     function onDatesChange() {
-        const startEl = document.getElementById('input-start');
-        const endEl   = document.getElementById('input-end');
+        const startEl  = document.getElementById('input-start');
+        const endEl    = document.getElementById('input-end');
         const startVal = startEl.value;
         const endVal   = endEl.value;
 
-        // Ensure end date can't be before start date
+        // End date can't be before start date
         if (startVal) {
             endEl.min = startVal;
-            if (endVal && endVal < startVal) {
-                endEl.value = startVal;
-            }
+            if (endVal && endVal < startVal) endEl.value = startVal;
         }
 
         let days = 0;
@@ -221,18 +241,16 @@
         if (startVal && endEl.value) {
             const start = new Date(startVal);
             const end   = new Date(endEl.value);
-            days = Math.round((end - start) / (1000 * 60 * 60 * 24));
-            if (days < 0) days = 0;
+            // Inclusive: May1→May3 = 3 days
+            days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-            // Show the computed days badge
             daysDisplay.classList.remove('hidden');
             document.getElementById('days-text').textContent =
-                days === 0 ? 'Same-day (0 days)' : `${days} day${days !== 1 ? 's' : ''}`;
+                `${days} day${days !== 1 ? 's' : ''}`;
 
             const opts = { month: 'long', day: 'numeric', year: 'numeric' };
-            const startStr = start.toLocaleDateString('en-PH', opts);
-            const endStr   = end.toLocaleDateString('en-PH', opts);
-            document.getElementById('date-range-text').textContent = `${startStr} → ${endStr}`;
+            document.getElementById('date-range-text').textContent =
+                `${start.toLocaleDateString('en-PH', opts)} → ${end.toLocaleDateString('en-PH', opts)}`;
         } else {
             daysDisplay.classList.add('hidden');
         }
@@ -241,25 +259,60 @@
         recalculate();
     }
 
+    // ── Time range changed ────────────────────────────────────────────────────
+    function onTimesChange() {
+        const tStartVal = document.getElementById('input-time-start').value;
+        const tEndVal   = document.getElementById('input-time-end').value;
+        const hpdDisplay = document.getElementById('hours-per-day-display');
+        let hoursPerDay = 0;
+
+        if (tStartVal && tEndVal) {
+            const [sh, sm] = tStartVal.split(':').map(Number);
+            const [eh, em] = tEndVal.split(':').map(Number);
+            const diffMins = (eh * 60 + em) - (sh * 60 + sm);
+            hoursPerDay = diffMins > 0 ? Math.round(diffMins / 60) : 0;
+
+            if (hoursPerDay > 0) {
+                hpdDisplay.classList.remove('hidden');
+                const fmt = t => {
+                    const [h, m] = t.split(':').map(Number);
+                    const ampm = h >= 12 ? 'PM' : 'AM';
+                    const h12  = h % 12 || 12;
+                    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+                };
+                document.getElementById('hours-per-day-text').textContent =
+                    `${fmt(tStartVal)} – ${fmt(tEndVal)} = ${hoursPerDay} hr${hoursPerDay !== 1 ? 's' : ''}/day`;
+            } else {
+                hpdDisplay.classList.add('hidden');
+            }
+        } else {
+            hpdDisplay.classList.add('hidden');
+        }
+
+        document.getElementById('input-hours').value = hoursPerDay;
+        recalculate();
+    }
+
+    // ── Recalculate cost ──────────────────────────────────────────────────────
     function recalculate() {
-        const days  = parseInt(document.getElementById('input-days').value) || 0;
-        const hours = parseInt(document.getElementById('input-hours').value) || 0;
-        const totalHours = (days * 24) + hours;
-        const totalCost  = totalHours * RATE;
+        const days        = parseInt(document.getElementById('input-days').value)  || 0;
+        const hoursPerDay = parseInt(document.getElementById('input-hours').value) || 0;
+        const totalHours  = days * hoursPerDay;
+        const totalCost   = totalHours * RATE;
 
         let durationText = '';
-        if (days > 0 && hours > 0) {
-            durationText = `${days} day${days !== 1 ? 's' : ''} + ${hours} hr${hours !== 1 ? 's' : ''} = ${totalHours} hours`;
+        if (days > 0 && hoursPerDay > 0) {
+            durationText = `${days} day${days !== 1 ? 's' : ''} × ${hoursPerDay} hr${hoursPerDay !== 1 ? 's' : ''}/day = ${totalHours} hours`;
         } else if (days > 0) {
-            durationText = `${days} day${days !== 1 ? 's' : ''} = ${totalHours} hours`;
+            durationText = `${days} day${days !== 1 ? 's' : ''} (set hour range)`;
         } else {
-            durationText = `${totalHours} hour${totalHours !== 1 ? 's' : ''}`;
+            durationText = 'Select dates and hour range above';
         }
 
         document.getElementById('display-hours').textContent = durationText;
-        document.getElementById('display-cost').textContent  = '₱' + totalCost.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        document.getElementById('display-cost').textContent  =
+            '₱' + totalCost.toLocaleString('en-PH', { minimumFractionDigits: 2 });
 
-        // Highlight cost box when cost is calculated
         const summary = document.getElementById('cost-summary');
         if (totalHours > 0) {
             summary.classList.add('border-blue-300', 'bg-blue-50');
@@ -270,7 +323,8 @@
         }
     }
 
-    // Run once on load (restores old() values after validation failure)
+    // Run on load to restore old() values after validation failure
     onDatesChange();
+    onTimesChange();
 </script>
 @endpush

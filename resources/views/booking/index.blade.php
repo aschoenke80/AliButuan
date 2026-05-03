@@ -44,6 +44,13 @@
                             @endif
                         </p>
                         @endif
+                        @if($booking->time_start && $booking->time_end)
+                        <p class="text-sm text-gray-500 mt-0.5">🕐 Daily hours:
+                            <strong>{{ \Carbon\Carbon::createFromFormat('H:i', $booking->time_start)->format('g:i A') }}</strong>
+                            → <strong>{{ \Carbon\Carbon::createFromFormat('H:i', $booking->time_end)->format('g:i A') }}</strong>
+                            ({{ $booking->hours }} hr{{ $booking->hours !== 1 ? 's' : '' }}/day)
+                        </p>
+                        @endif
                         <p class="text-sm text-gray-500 mt-0.5">⏱️
                             @if($booking->days > 0 && $booking->hours > 0)
                                 {{ $booking->days }} day{{ $booking->days !== 1 ? 's' : '' }} + {{ $booking->hours }} hr{{ $booking->hours !== 1 ? 's' : '' }}
