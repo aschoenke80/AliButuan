@@ -79,12 +79,7 @@ class EventController extends Controller
     // Show the edit form for an event
     public function edit(Event $event)
     {
-        // Only allow editing own pending or rejected events
         $this->authorizeEvent($event);
-
-        if ($event->status === 'approved') {
-            return back()->with('error', 'Approved events cannot be edited.');
-        }
 
         $categories = array_keys(Event::CATEGORIES);
         return view('organizer.events.edit', compact('event', 'categories'));
@@ -94,10 +89,6 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         $this->authorizeEvent($event);
-
-        if ($event->status === 'approved') {
-            return back()->with('error', 'Approved events cannot be edited.');
-        }
 
         $data = $request->validate([
             'title'          => 'required|string|max:255',
@@ -114,15 +105,16 @@ class EventController extends Controller
 
         // Handle new image upload
         if ($request->hasFile('image')) {
-            // Delete old image if it exists
             if ($event->image) {
                 Storage::disk('public')->delete($event->image);
             }
             $data['image'] = $request->file('image')->store('events', 'public');
         }
 
-        // Reset status to pending on update so admin re-reviews
-        $data['status'] = 'pending';
+        // Re-submit for approval if it was approved (so admin reviews changes)
+        if ($event->status === 'approved') {
+            $data['status'] = 'pending';
+        }
 
         $event->update($data);
 
@@ -130,14 +122,30 @@ class EventController extends Controller
             ->with('success', 'Event updated and re-submitted for approval.');
     }
 
+    // Archive an event (mark as done)
+    public function archive(Event $event)
+    {
+        $this->authorizeEvent($event);
+
+        $event->update(['is_archived' => true]);
+
+        return back()->with('success', 'Event archived successfully.');
+    }
+
+    // Unarchive an event
+    public function unarchive(Event $event)
+    {
+        $this->authorizeEvent($event);
+
+        $event->update(['is_archived' => false]);
+
+        return back()->with('success', 'Event restored from archive.');
+    }
+
     // Delete a pending or rejected event
     public function destroy(Event $event)
     {
         $this->authorizeEvent($event);
-
-        if ($event->status === 'approved') {
-            return back()->with('error', 'Approved events cannot be deleted.');
-        }
 
         if ($event->image) {
             Storage::disk('public')->delete($event->image);

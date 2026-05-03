@@ -20,12 +20,14 @@ class Event extends Model
         'image',
         'status',
         'is_featured',
+        'is_archived',
     ];
 
     protected $casts = [
         'start_datetime' => 'datetime',
         'end_datetime'   => 'datetime',
         'is_featured'    => 'boolean',
+        'is_archived'    => 'boolean',
         'latitude'       => 'float',
         'longitude'      => 'float',
     ];
@@ -64,15 +66,21 @@ class Event extends Model
         return $this->favorites()->where('user_id', $userId)->exists();
     }
 
-    // Scope: only approved events
+    // Scope: only approved, non-archived events (public)
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', 'approved')->where('is_archived', false);
+    }
+
+    // Scope: only archived events (organizer/admin)
+    public function scopeArchived($query)
+    {
+        return $query->where('is_archived', true);
     }
 
     // Scope: featured events
     public function scopeFeatured($query)
     {
-        return $query->where('is_featured', true);
+        return $query->where('is_featured', true)->where('is_archived', false);
     }
 }

@@ -11,7 +11,14 @@ class EventController extends Controller
     // Show list of all approved events, with search and filter
     public function index(Request $request)
     {
-        $query = Event::approved()->with('organizer')->orderBy('start_datetime');
+        $isPrivileged = auth()->check() && in_array(auth()->user()->role, ['admin', 'organizer']);
+        $showArchived = $isPrivileged && $request->get('filter') === 'archived';
+
+        if ($showArchived) {
+            $query = Event::archived()->with('organizer')->orderByDesc('end_datetime');
+        } else {
+            $query = Event::approved()->with('organizer')->orderBy('start_datetime');
+        }
 
         // Search by title or location name
         if ($request->filled('search')) {
@@ -30,15 +37,19 @@ class EventController extends Controller
         $events     = $query->paginate(12)->withQueryString();
         $categories = array_keys(Event::CATEGORIES);
 
-        return view('events.index', compact('events', 'categories'));
+        return view('events.index', compact('events', 'categories', 'showArchived', 'isPrivileged'));
     }
 
     // Show a single event
     public function show(Event $event)
     {
-        // Only show approved events to the public
-        if ($event->status !== 'approved') {
-            abort(404);
+        $isPrivileged = auth()->check() && in_array(auth()->user()->role, ['admin', 'organizer']);
+
+        // Allow organizer/admin to view any event; public only sees approved non-archived
+        if (!$isPrivileged) {
+            if ($event->status !== 'approved' || $event->is_archived) {
+                abort(404);
+            }
         }
 
         $isFavorited = false;

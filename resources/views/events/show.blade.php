@@ -13,15 +13,54 @@
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
         {{-- Hero image --}}
-        @if($event->image)
-            <div class="h-72 md:h-96 overflow-hidden">
-                <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}"
-                     class="w-full h-full object-cover" />
-            </div>
+        @php
+            $canManage = auth()->check() && (auth()->user()->role === 'admin' || (auth()->user()->role === 'organizer' && $event->organizer_id === auth()->id()));
+        @endphp
+
+        @if($canManage)
+            {{-- Clickable image upload for organizer/admin --}}
+            <form id="image-upload-form" method="POST" action="{{ route('organizer.events.update', $event->id) }}" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                {{-- Hidden fields to keep other data intact --}}
+                <input type="hidden" name="title" value="{{ $event->title }}">
+                <input type="hidden" name="description" value="{{ $event->description }}">
+                <input type="hidden" name="category" value="{{ $event->category }}">
+                <input type="hidden" name="audience" value="{{ $event->audience }}">
+                <input type="hidden" name="location_name" value="{{ $event->location_name }}">
+                <input type="hidden" name="latitude" value="{{ $event->latitude }}">
+                <input type="hidden" name="longitude" value="{{ $event->longitude }}">
+                <input type="hidden" name="start_datetime" value="{{ $event->start_datetime->format('Y-m-d\TH:i') }}">
+                <input type="hidden" name="end_datetime" value="{{ $event->end_datetime->format('Y-m-d\TH:i') }}">
+                <input type="file" id="image-input" name="image" accept="image/*" class="hidden" onchange="document.getElementById('image-upload-form').submit()">
+                <div onclick="document.getElementById('image-input').click()"
+                     class="cursor-pointer relative group">
+                    @if($event->image)
+                        <div class="h-72 md:h-96 overflow-hidden">
+                            <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}"
+                                 class="w-full h-full object-cover" />
+                        </div>
+                    @else
+                        <div class="h-48 bg-gradient-to-br from-blue-50 to-sky-100 flex items-center justify-center text-8xl">
+                            {{ $event->category_emoji }}
+                        </div>
+                    @endif
+                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-t-2xl">
+                        <span class="bg-white text-gray-800 text-sm font-semibold px-4 py-2 rounded-full shadow">📷 Click to change image</span>
+                    </div>
+                </div>
+            </form>
         @else
-            <div class="h-48 bg-gradient-to-br from-blue-50 to-sky-100 flex items-center justify-center text-8xl">
-                {{ $event->category_emoji }}
-            </div>
+            @if($event->image)
+                <div class="h-72 md:h-96 overflow-hidden">
+                    <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}"
+                         class="w-full h-full object-cover" />
+                </div>
+            @else
+                <div class="h-48 bg-gradient-to-br from-blue-50 to-sky-100 flex items-center justify-center text-8xl">
+                    {{ $event->category_emoji }}
+                </div>
+            @endif
         @endif
 
         <div class="p-6 md:p-10">
@@ -90,8 +129,46 @@
 
                 {{-- Action buttons --}}
                 <div class="flex flex-col gap-3 min-w-40">
+                    {{-- Organizer / Admin management buttons --}}
+                    @if($canManage)
+                        <a href="{{ route('organizer.events.edit', $event->id) }}"
+                           class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm hover:bg-blue-700 transition-colors">
+                            ✏️ Edit Event
+                        </a>
+
+                        @if($event->is_archived)
+                            <form method="POST" action="{{ route('organizer.events.unarchive', $event->id) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 text-green-700 border border-green-200 rounded-xl font-medium text-sm hover:bg-green-100 transition-colors">
+                                    📂 Restore Event
+                                </button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('organizer.events.archive', $event->id) }}"
+                                  onsubmit="return confirm('Archive this event? It will be hidden from public view.')">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl font-medium text-sm hover:bg-amber-100 transition-colors">
+                                    🗄️ Archive Event
+                                </button>
+                            </form>
+                        @endif
+
+                        @if($event->is_archived)
+                            <span class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-medium">
+                                🗄️ This event is archived
+                            </span>
+                        @endif
+
+                        <hr class="border-gray-100">
+                    @endif
+
                     @auth
                         {{-- Save / Unsave button --}}
+                        @if(!$event->is_archived)
                         <form method="POST" action="{{ route('favorites.toggle', $event->id) }}">
                             @csrf
                             <button type="submit"
@@ -100,6 +177,7 @@
                                 {{ $isFavorited ? '❤️ Saved' : '🤍 Save Event' }}
                             </button>
                         </form>
+                        @endif
                     @else
                         <a href="{{ route('login') }}"
                            class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-50 text-green-600 border border-green-200 rounded-xl font-medium text-sm hover:bg-green-100 transition-colors">
@@ -158,10 +236,19 @@
     }).addTo(map);
 
     const emoji = '{{ $event->category_emoji }}';
+    const imageUrl = @json($event->image ? asset('storage/' . $event->image) : null);
+
+    let iconHtml;
+    if (imageUrl) {
+        iconHtml = `<div style="width:40px;height:40px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);overflow:hidden;background:#e5e7eb;"><img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>`;
+    } else {
+        iconHtml = `<div style="font-size:28px;line-height:1;">${emoji}</div>`;
+    }
+
     const icon = L.divIcon({
-        html: `<div style="font-size:28px;line-height:1;">${emoji}</div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        html: iconHtml,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
         className: ''
     });
 

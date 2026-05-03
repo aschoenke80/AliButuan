@@ -153,19 +153,33 @@
         }
     }
 
-    // Create an emoji marker
+    // Create a marker — uses event image if available, otherwise emoji
     function createMarker(event) {
+        let iconHtml;
+        if (event.image_url) {
+            iconHtml = `<div style="width:40px;height:40px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);overflow:hidden;background:#e5e7eb;">
+                <img src="${event.image_url}" style="width:100%;height:100%;object-fit:cover;" />
+            </div>`;
+        } else {
+            iconHtml = `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${event.emoji}</div>`;
+        }
+
         const icon = L.divIcon({
-            html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${event.emoji}</div>`,
-            iconSize: [36, 36],
-            iconAnchor: [18, 18],
+            html: iconHtml,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
             className: '',
         });
+
+        const popupImage = event.image_url
+            ? `<img src="${event.image_url}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:8px;" />`
+            : '';
 
         const marker = L.marker([event.latitude, event.longitude], { icon })
             .addTo(map)
             .bindPopup(`
                 <div style="min-width:180px;">
+                    ${popupImage}
                     <p style="font-size:11px;color:#6b7280;margin-bottom:4px;">${event.emoji} ${event.category}</p>
                     <p style="font-weight:700;font-size:14px;margin-bottom:6px;color:#1f2937;">${event.title}</p>
                     <p style="font-size:12px;color:#6b7280;margin-bottom:2px;">📅 ${event.start_date}</p>

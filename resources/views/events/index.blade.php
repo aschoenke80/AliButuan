@@ -43,21 +43,33 @@
     <div class="flex flex-wrap gap-2 mb-8">
         <a href="{{ route('events.index') }}"
            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
-                  {{ !request('category') || request('category') === 'All' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600' }}">
+                  {{ (!request('category') || request('category') === 'All') && !$showArchived ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600' }}">
             All
         </a>
         @foreach($categories as $cat)
             <a href="{{ route('events.index', ['category' => $cat, 'search' => request('search')]) }}"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
-                      {{ request('category') === $cat ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600' }}">
+                      {{ request('category') === $cat && !$showArchived ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600' }}">
                 {{ \App\Models\Event::CATEGORIES[$cat] }} {{ $cat }}
             </a>
         @endforeach
+
+        {{-- Archive tab: only visible to admin and organizer --}}
+        @if($isPrivileged)
+            <a href="{{ route('events.index', ['filter' => 'archived']) }}"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+                      {{ $showArchived ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800' }}">
+                🗄️ Archive
+            </a>
+        @endif
     </div>
 
     {{-- Results count --}}
     <p class="text-sm text-gray-500 mb-6">
         {{ $events->total() }} event{{ $events->total() !== 1 ? 's' : '' }} found
+        @if($showArchived)
+            <span class="ml-2 inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full">🗄️ Archived events — not visible to the public</span>
+        @endif
     </p>
 
     {{-- Events grid --}}

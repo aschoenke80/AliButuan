@@ -30,6 +30,7 @@ class MapController extends Controller
                     'longitude'     => $event->longitude,
                     'start_date'    => $event->start_datetime->format('M d, Y'),
                     'url'           => route('events.show', $event->id),
+                    'image_url'     => $event->image ? asset('storage/' . $event->image) : null,
                 ];
             });
 

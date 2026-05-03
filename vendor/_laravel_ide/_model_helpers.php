@@ -380,6 +380,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Event>|Event newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Event>|Event query()
      * @method static \Illuminate\Database\Eloquent\Builder<Event>|Event approved() {@see App\Models\Event::scopeApproved()}
+     * @method static \Illuminate\Database\Eloquent\Builder<Event>|Event archived() {@see App\Models\Event::scopeArchived()}
      * @method static \Illuminate\Database\Eloquent\Builder<Event>|Event featured() {@see App\Models\Event::scopeFeatured()}
      * @method static mixed select($columns)
      * @method static mixed selectSub($query, $as)

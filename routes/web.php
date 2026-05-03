@@ -58,6 +58,8 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::post('/events', [OrganizerEventController::class, 'store'])->name('events.store');
     Route::get('/events/{event}/edit', [OrganizerEventController::class, 'edit'])->name('events.edit');
     Route::put('/events/{event}', [OrganizerEventController::class, 'update'])->name('events.update');
+    Route::patch('/events/{event}/archive', [OrganizerEventController::class, 'archive'])->name('events.archive');
+    Route::patch('/events/{event}/unarchive', [OrganizerEventController::class, 'unarchive'])->name('events.unarchive');
     Route::delete('/events/{event}', [OrganizerEventController::class, 'destroy'])->name('events.destroy');
 });
 
