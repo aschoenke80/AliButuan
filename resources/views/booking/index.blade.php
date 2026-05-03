@@ -37,7 +37,12 @@
                         </div>
                         <p class="text-sm text-gray-500">📍 {{ $booking->location }}</p>
                         @if($booking->advertise_start)
-                        <p class="text-sm text-gray-500 mt-0.5">📅 Ad starts: <strong>{{ $booking->advertise_start->format('F j, Y') }}</strong></p>
+                        <p class="text-sm text-gray-500 mt-0.5">📅 Ad period:
+                            <strong>{{ $booking->advertise_start->format('M j, Y') }}</strong>
+                            @if($booking->advertise_end)
+                                → <strong>{{ $booking->advertise_end->format('M j, Y') }}</strong>
+                            @endif
+                        </p>
                         @endif
                         <p class="text-sm text-gray-500 mt-0.5">⏱️
                             @if($booking->days > 0 && $booking->hours > 0)

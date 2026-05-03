@@ -60,52 +60,72 @@
                     <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                 @enderror
             </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Advertisement Start Date <span class="text-red-500">*</span></label>
-                <input type="date" name="advertise_start"
-                       value="{{ old('advertise_start') }}"
-                       min="{{ now()->format('Y-m-d') }}"
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('advertise_start') border-red-400 @enderror" />
-                @error('advertise_start')
-                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-xs text-gray-400">Pick the date you want the ad to go live.</p>
-            </div>
         </div>
 
-        {{-- Duration & Cost --}}
+        {{-- Date Range + Duration & Cost --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-            <h2 class="text-base font-semibold text-gray-800 border-b border-gray-100 pb-3">⏱️ Advertisement Duration</h2>
+            <h2 class="text-base font-semibold text-gray-800 border-b border-gray-100 pb-3">📅 Advertisement Period</h2>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Days</label>
-                    <div class="relative">
-                        <input type="number" name="days" id="input-days" value="{{ old('days', 0) }}"
-                               min="0" max="365" placeholder="0"
-                               oninput="recalculate()"
-                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('days') border-red-400 @enderror" />
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">day(s)</span>
+            {{-- Date Range Picker --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Select Date Range <span class="text-red-500">*</span></label>
+                <div class="flex items-end gap-3">
+                    <div class="flex-1">
+                        <p class="text-xs font-medium text-gray-500 mb-1.5">From</p>
+                        <input type="date" name="advertise_start" id="input-start"
+                               value="{{ old('advertise_start') }}"
+                               min="{{ now()->format('Y-m-d') }}"
+                               onchange="onDatesChange()"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('advertise_start') border-red-400 @enderror" />
+                        @error('advertise_start')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
                     </div>
-                    @error('days')
-                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Additional Hours</label>
-                    <div class="relative">
-                        <input type="number" name="hours" id="input-hours" value="{{ old('hours', 0) }}"
-                               min="0" max="23" placeholder="0"
-                               oninput="recalculate()"
-                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('hours') border-red-400 @enderror" />
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">hr(s)</span>
+                    <div class="pb-2.5 text-gray-400 font-bold text-lg select-none">→</div>
+
+                    <div class="flex-1">
+                        <p class="text-xs font-medium text-gray-500 mb-1.5">To</p>
+                        <input type="date" name="advertise_end" id="input-end"
+                               value="{{ old('advertise_end') }}"
+                               min="{{ now()->format('Y-m-d') }}"
+                               onchange="onDatesChange()"
+                               class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('advertise_end') border-red-400 @enderror" />
+                        @error('advertise_end')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
                     </div>
-                    @error('hours')
-                        <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
-                    @enderror
                 </div>
+            </div>
+
+            {{-- Auto-computed days badge --}}
+            <div id="days-display" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                <span class="text-2xl">📆</span>
+                <div>
+                    <p id="days-text" class="font-bold text-blue-800"></p>
+                    <p id="date-range-text" class="text-xs text-blue-600 mt-0.5"></p>
+                </div>
+            </div>
+
+            {{-- Hidden days field (computed by JS, verified server-side) --}}
+            <input type="hidden" name="days" id="input-days" value="{{ old('days', 0) }}" />
+
+            {{-- Additional hours --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                    Additional Hours
+                    <span class="text-gray-400 text-xs font-normal">(extra hours on top of the selected days)</span>
+                </label>
+                <div class="relative w-48">
+                    <input type="number" name="hours" id="input-hours" value="{{ old('hours', 0) }}"
+                           min="0" max="23" placeholder="0"
+                           oninput="recalculate()"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('hours') border-red-400 @enderror" />
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">hr(s)</span>
+                </div>
+                @error('hours')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                @enderror
             </div>
 
             {{-- Cost Summary --}}
@@ -181,8 +201,48 @@
 <script>
     const RATE = 100; // pesos per hour
 
+    function onDatesChange() {
+        const startEl = document.getElementById('input-start');
+        const endEl   = document.getElementById('input-end');
+        const startVal = startEl.value;
+        const endVal   = endEl.value;
+
+        // Ensure end date can't be before start date
+        if (startVal) {
+            endEl.min = startVal;
+            if (endVal && endVal < startVal) {
+                endEl.value = startVal;
+            }
+        }
+
+        let days = 0;
+        const daysDisplay = document.getElementById('days-display');
+
+        if (startVal && endEl.value) {
+            const start = new Date(startVal);
+            const end   = new Date(endEl.value);
+            days = Math.round((end - start) / (1000 * 60 * 60 * 24));
+            if (days < 0) days = 0;
+
+            // Show the computed days badge
+            daysDisplay.classList.remove('hidden');
+            document.getElementById('days-text').textContent =
+                days === 0 ? 'Same-day (0 days)' : `${days} day${days !== 1 ? 's' : ''}`;
+
+            const opts = { month: 'long', day: 'numeric', year: 'numeric' };
+            const startStr = start.toLocaleDateString('en-PH', opts);
+            const endStr   = end.toLocaleDateString('en-PH', opts);
+            document.getElementById('date-range-text').textContent = `${startStr} → ${endStr}`;
+        } else {
+            daysDisplay.classList.add('hidden');
+        }
+
+        document.getElementById('input-days').value = days;
+        recalculate();
+    }
+
     function recalculate() {
-        const days  = parseInt(document.getElementById('input-days').value)  || 0;
+        const days  = parseInt(document.getElementById('input-days').value) || 0;
         const hours = parseInt(document.getElementById('input-hours').value) || 0;
         const totalHours = (days * 24) + hours;
         const totalCost  = totalHours * RATE;
@@ -199,7 +259,7 @@
         document.getElementById('display-hours').textContent = durationText;
         document.getElementById('display-cost').textContent  = '₱' + totalCost.toLocaleString('en-PH', { minimumFractionDigits: 2 });
 
-        // Highlight when cost is calculated
+        // Highlight cost box when cost is calculated
         const summary = document.getElementById('cost-summary');
         if (totalHours > 0) {
             summary.classList.add('border-blue-300', 'bg-blue-50');
@@ -210,7 +270,7 @@
         }
     }
 
-    // Run once on load in case of old() values
-    recalculate();
+    // Run once on load (restores old() values after validation failure)
+    onDatesChange();
 </script>
 @endpush

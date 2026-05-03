@@ -20,7 +20,7 @@ class BookingController extends Controller
             'event_name'      => 'required|string|max:255',
             'location'        => 'required|string|max:255',
             'advertise_start' => 'required|date|after_or_equal:today',
-            'days'            => 'required|integer|min:0',
+            'advertise_end'   => 'required|date|after_or_equal:advertise_start',
             'hours'           => 'required|integer|min:0|max:23',
             'contact_name'    => 'required|string|max:255',
             'contact_email'   => 'required|email|max:255',
@@ -28,19 +28,24 @@ class BookingController extends Controller
             'notes'           => 'nullable|string|max:1000',
         ]);
 
+        // Compute days server-side from the date range
+        $days = \Carbon\Carbon::parse($data['advertise_start'])
+                    ->diffInDays(\Carbon\Carbon::parse($data['advertise_end']));
+
         // Must have at least 1 hour total
-        if (($data['days'] * 24 + $data['hours']) < 1) {
-            return back()->withErrors(['hours' => 'Please enter at least 1 hour or 1 day.'])->withInput();
+        if (($days * 24 + (int)$data['hours']) < 1) {
+            return back()->withErrors(['hours' => 'Please select at least 1 day or add extra hours.'])->withInput();
         }
 
-        $computed = Booking::computeCost((int)$data['days'], (int)$data['hours']);
+        $computed = Booking::computeCost((int)$days, (int)$data['hours']);
 
         $booking = Booking::create([
             'user_id'         => auth()->id(),
             'event_name'      => $data['event_name'],
             'location'        => $data['location'],
             'advertise_start' => $data['advertise_start'],
-            'days'            => $data['days'],
+            'advertise_end'   => $data['advertise_end'],
+            'days'            => $days,
             'hours'           => $data['hours'],
             'total_hours'     => $computed['totalHours'],
             'total_cost'      => $computed['totalCost'],
@@ -53,12 +58,13 @@ class BookingController extends Controller
 
         // Notify all admin users
         $startFormatted = \Carbon\Carbon::parse($booking->advertise_start)->format('F j, Y');
+        $endFormatted   = \Carbon\Carbon::parse($booking->advertise_end)->format('F j, Y');
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             AppNotification::create([
                 'user_id' => $admin->id,
                 'title'   => '📣 New Booking Request',
-                'message' => "{$booking->contact_name} submitted a booking for \"{$booking->event_name}\" starting {$startFormatted}. Estimated cost: ₱" . number_format($booking->total_cost, 2),
+                'message' => "{$booking->contact_name} submitted a booking for \"{$booking->event_name}\" from {$startFormatted} to {$endFormatted} ({$booking->days} days). Estimated cost: ₱" . number_format($booking->total_cost, 2),
                 'type'    => 'booking',
                 'is_read' => false,
             ]);
