@@ -9,6 +9,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
+use App\Http\Controllers\Organizer\BookingController as OrganizerBookingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -18,10 +19,10 @@ use Illuminate\Support\Facades\Route;
 // ─── Public Routes ────────────────────────────────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Booking (public — login required to submit)
+// Booking — anyone can view the form; submitting requires auth
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store')->middleware('auth');
-Route::get('/admin/bookings', [BookingController::class, 'index'])->name('admin.bookings.index')->middleware(['auth', 'admin']);
+Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('booking.my')->middleware('auth');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
@@ -67,6 +68,11 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::patch('/events/{event}/archive', [OrganizerEventController::class, 'archive'])->name('events.archive');
     Route::patch('/events/{event}/unarchive', [OrganizerEventController::class, 'unarchive'])->name('events.unarchive');
     Route::delete('/events/{event}', [OrganizerEventController::class, 'destroy'])->name('events.destroy');
+
+    // Booking management
+    Route::get('/bookings', [OrganizerBookingController::class, 'index'])->name('bookings.index');
+    Route::post('/bookings/{booking}/approve', [OrganizerBookingController::class, 'approve'])->name('bookings.approve');
+    Route::post('/bookings/{booking}/reject', [OrganizerBookingController::class, 'reject'])->name('bookings.reject');
 });
 
 // ─── Admin Routes ─────────────────────────────────────────────────────────────

@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
                 $unread = AppNotification::where('user_id', auth()->id())
                     ->where('is_read', false)
                     ->count();
-                if (auth()->user()->isAdmin()) {
+                if (auth()->user()->isOrganizer()) {
                     $pendingBookings = Booking::where('status', 'pending')->count();
                 }
             }

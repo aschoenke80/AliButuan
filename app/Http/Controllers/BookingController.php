@@ -64,13 +64,13 @@ class BookingController extends Controller
             'status'          => 'pending',
         ]);
 
-        // Notify all admin users
+        // Notify all organizers
         $startFormatted = \Carbon\Carbon::parse($booking->advertise_start)->format('F j, Y');
         $endFormatted   = \Carbon\Carbon::parse($booking->advertise_end)->format('F j, Y');
-        $admins = User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
+        $organizers = User::where('role', 'organizer')->get();
+        foreach ($organizers as $organizer) {
             AppNotification::create([
-                'user_id' => $admin->id,
+                'user_id' => $organizer->id,
                 'title'   => '📣 New Booking Request',
                 'message' => "{$booking->contact_name} submitted a booking for \"{$booking->event_name}\" from {$startFormatted} to {$endFormatted} ({$booking->days} days). Estimated cost: ₱" . number_format($booking->total_cost, 2),
                 'type'    => 'booking',
@@ -80,6 +80,12 @@ class BookingController extends Controller
 
         return redirect()->route('booking.create')
             ->with('success', 'Your booking request has been submitted! We will contact you shortly.');
+    }
+
+    public function myBookings()
+    {
+        $bookings = Booking::where('user_id', auth()->id())->latest()->paginate(15);
+        return view('booking.my-bookings', compact('bookings'));
     }
 
     public function index()

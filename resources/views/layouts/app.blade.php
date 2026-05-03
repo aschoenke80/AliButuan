@@ -117,20 +117,25 @@
                                 <a href="{{ route('favorites.index') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                     ❤️ My Favorites
                                 </a>
+                                @if(!auth()->user()->isOrganizer())
+                                <a href="{{ route('booking.my') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    📣 My Bookings
+                                </a>
+                                @endif
                                 @if(auth()->user()->isOrganizer())
                                     <a href="{{ route('organizer.dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         📋 Organizer Dashboard
+                                    </a>
+                                    <a href="{{ route('organizer.bookings.index') }}" class="flex items-center justify-between gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        <span>📣 Booking Requests</span>
+                                        @if($pendingBookingsCount > 0)
+                                            <span class="bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ $pendingBookingsCount }}</span>
+                                        @endif
                                     </a>
                                 @endif
                                 @if(auth()->user()->isAdmin())
                                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         ⚙️ Admin Dashboard
-                                    </a>
-                                    <a href="{{ route('admin.bookings.index') }}" class="flex items-center justify-between gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                        <span>📣 Booking Requests</span>
-                                        @if($pendingBookingsCount > 0)
-                                            <span class="bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ $pendingBookingsCount }}</span>
-                                        @endif
                                     </a>
                                 @endif
                                 <div class="border-t border-gray-100 mt-1">
@@ -191,15 +196,18 @@
                         <a href="{{ route('favorites.index') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">❤️ My Favorites</a>
                         @if(auth()->user()->isOrganizer())
                             <a href="{{ route('organizer.dashboard') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📋 Organizer Dashboard</a>
-                        @endif
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">⚙️ Admin Dashboard</a>
-                            <a href="{{ route('admin.bookings.index') }}" class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
+                            <a href="{{ route('organizer.bookings.index') }}" class="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
                                 <span>📣 Booking Requests</span>
                                 @if($pendingBookingsCount > 0)
                                     <span class="bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ $pendingBookingsCount }}</span>
                                 @endif
                             </a>
+                        @endif
+                        @if(!auth()->user()->isOrganizer())
+                            <a href="{{ route('booking.my') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📣 My Bookings</a>
+                        @endif
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">⚙️ Admin Dashboard</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}" class="px-4 py-1">
                             @csrf
