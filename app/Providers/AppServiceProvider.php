@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\AppNotification;
 use App\Models\Booking;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,6 +14,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Force HTTPS on production (Vercel)
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Inject unread notification count and pending bookings count into every view
         View::composer('*', function ($view) {
             $unread          = 0;

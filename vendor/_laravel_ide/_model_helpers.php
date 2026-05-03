@@ -340,7 +340,45 @@ namespace App\Models {
     /**
      * App\Models\Booking
      *
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property string|null $time_end
+     * @property string|null $time_start
+     * @property \Illuminate\Support\Carbon|null $advertise_end
+     * @property \Illuminate\Support\Carbon|null $advertise_start
+     * @property string $status
+     * @property float $total_cost
+     * @property mixed $total_hours
+     * @property mixed $days
+     * @property mixed $hours
+     * @property string|null $notes
+     * @property string|null $contact_phone
+     * @property string $contact_email
+     * @property string $contact_name
+     * @property string $location
+     * @property string $event_name
+     * @property mixed $user_id
+     * @property int $id
      * @property-read \App\Models\User $user
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereUserId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereEventName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereLocation($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereContactName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereContactEmail($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereContactPhone($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereNotes($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereHours($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereDays($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereTotalHours($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereTotalCost($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereStatus($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereAdvertiseStart($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereAdvertiseEnd($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereTimeStart($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereTimeEnd($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<Booking>|Booking query()
