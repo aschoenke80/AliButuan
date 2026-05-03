@@ -41,11 +41,21 @@
                         Map
                     </a>
 
+                    @guest
                     <a href="{{ route('booking.create') }}"
                        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
                               {{ request()->routeIs('booking.*') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">
                         📣 Booking
                     </a>
+                    @else
+                    @if(!auth()->user()->isOrganizer() && !auth()->user()->isAdmin())
+                    <a href="{{ route('booking.create') }}"
+                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                              {{ request()->routeIs('booking.*') ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">
+                        📣 Booking
+                    </a>
+                    @endif
+                    @endguest
 
                     {{-- Categories Dropdown --}}
                     <div class="relative group">
@@ -117,7 +127,7 @@
                                 <a href="{{ route('favorites.index') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                     ❤️ My Favorites
                                 </a>
-                                @if(!auth()->user()->isOrganizer())
+                                @if(!auth()->user()->isOrganizer() && !auth()->user()->isAdmin())
                                 <a href="{{ route('booking.my') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                     📣 My Bookings
                                 </a>
@@ -170,7 +180,13 @@
                 <a href="{{ route('home') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">🏠 Home</a>
                 <a href="{{ route('events.index') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📅 Events</a>
                 <a href="{{ route('map.index') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">🗺️ Map</a>
+                @guest
                 <a href="{{ route('booking.create') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📣 Booking</a>
+                @else
+                @if(!auth()->user()->isOrganizer() && !auth()->user()->isAdmin())
+                <a href="{{ route('booking.create') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📣 Booking</a>
+                @endif
+                @endguest
 
                 <p class="px-4 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-2">Categories</p>
                 @foreach (\App\Models\Event::CATEGORIES as $cat => $emoji)
@@ -203,7 +219,7 @@
                                 @endif
                             </a>
                         @endif
-                        @if(!auth()->user()->isOrganizer())
+                        @if(!auth()->user()->isOrganizer() && !auth()->user()->isAdmin())
                             <a href="{{ route('booking.my') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">📣 My Bookings</a>
                         @endif
                         @if(auth()->user()->isAdmin())
@@ -260,7 +276,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-6">
+                    @auth
+                    @if(!auth()->user()->isOrganizer() && !auth()->user()->isAdmin())
                     <a href="{{ route('booking.create') }}" class="text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium">📣 Book an Ad</a>
+                    @endif
+                    @else
+                    <a href="{{ route('booking.create') }}" class="text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium">📣 Book an Ad</a>
+                    @endauth
                     <a href="https://www.facebook.com/profile.php?id=100063656966273" target="_blank" rel="noopener noreferrer"
                        class="text-gray-400 hover:text-blue-600 transition-colors" aria-label="Facebook">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
